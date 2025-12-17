@@ -17,6 +17,9 @@ def get_db():
     finally:
         db.close()
         
+        
+# Student
+
 def create_new_student(data: dict):
     db: Session = next(get_db())
 
@@ -65,9 +68,9 @@ def add_group_for_student(id: int, gr_id: int):
     if not student:
         return None
     
-    group = db.get(Group)
+    group = db.get(Group, gr_id)
 
-    if group not in student.groups:
+    if group in student.groups:
         return None
     student.groups.append(group)
     db.commit()
@@ -111,4 +114,21 @@ def delete_student(id: int):
     db.commit()
     return True
 
+
+# Course
+
+def get_all_groups():
     
+    db: Session = next(get_db())
+    
+    groups = db.query(Group).all()
+    
+    return groups
+
+def create_new_group(data):
+    db: Session = next(get_db())
+    group = Group(**data)
+    db.add(group)
+    db.commit()
+    db.refresh(group)
+    return group
