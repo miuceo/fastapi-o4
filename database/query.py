@@ -200,3 +200,14 @@ def update_group(id: int, data: dict):
     db.commit()
     db.refresh(group)
     return group
+
+def delete_group(id: int):
+    db: Session = next(get_db())
+    group = db.get(Group, id)
+
+    if not group:
+        raise HTTPException(status_code=404, detail=f"Group with id {id} not found!")
+
+    db.delete(group)
+    db.commit()
+    return True

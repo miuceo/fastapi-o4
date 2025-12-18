@@ -1,11 +1,13 @@
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
+from fastapi.responses import Response
 
 from database import (
     get_all_groups,
     create_new_group,
     get_single_group,
-    update_group
+    update_group,
+    delete_group
 )
 from schemas import (
     GroupBase,
@@ -44,3 +46,12 @@ def patch_group_api(id: int, data: GroupPatch):
     group = update_group(id, data.model_dump(exclude_unset=True))
     return group
 
+@group_router.delete('/{id}')
+def delete_group_api(id: int):
+    delete_group(id)
+    return Response(
+        {
+            "message": f"Group with id {id} deleted!",
+        },
+        status_code=status.HTTP_200_OK
+    )
