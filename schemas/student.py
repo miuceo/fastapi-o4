@@ -1,18 +1,41 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
 
-class StudentBase(BaseModel):
+class GroupSimple(BaseModel):
+    id: int
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class StudentTeacherSimple(BaseModel):
+    id: int
+    name: str
+    year: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+class StudentTeacherBase(BaseModel):
     name: str = Field(max_length=100, min_length=3)
     year: int
-    groups: List[Optional[int]] | None
+    groups: Optional[List]
     
-class StudentResponce(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+class StudentTeacherResponse(BaseModel):
     id: int
     name: str = Field(max_length=100, min_length=3)
     year: int
-    groups: List
+    groups: Optional[List[GroupSimple]] = None
 
-class StudentPatch(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class StudentTeacherPatch(BaseModel):
     name: str | None = None
     year: int | None = None
-    groups: List | None = None
+    groups: Optional[List] | None = None
+    
+    class Config:
+        orm_mode = True
+
+           

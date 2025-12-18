@@ -1,25 +1,66 @@
-from fastapi import APIRouter, HTTPException
+from typing import List, Optional
+from fastapi import APIRouter, status
+from fastapi.responses import Response
+from fastapi.exceptions import HTTPException
 from schemas import (
-    StudentBase
+    StudentTeacherBase,
+    StudentTeacherPatch,
+    StudentTeacherResponse
 )
 from database import (
     get_one_student,
     get_all_students,
-    create_new_student
+    create_new_student,
+    add_group_for_student,
+    update_student,
+    delete_student,
+    remove_group_for_student
 )
 
 student_router = APIRouter(
     prefix='/students',
 )
 
-@student_router.get("/")
+@student_router.get("/", response_model=List[StudentTeacherResponse])
 def get_all_students_api():
     return get_all_students()
 
-@student_router.get("/{id}")
+@student_router.get("/{id}", response_model=StudentTeacherResponse)
 def get_all_students_api(id: int):
-    return get_one_student(id)
+    student = get_one_student(id)
+    return student
 
-@student_router.post("/")
-def create_new_student_api(data: StudentBase):
-    return create_new_student(data.model_dump())
+@student_router.post("/", response_model=StudentTeacherResponse)
+def create_new_student_api(data: StudentTeacherBase) :
+    student = create_new_student(data.model_dump())
+    return student
+
+@student_router.put('/{id}', response_model=StudentTeacherResponse)
+def put_student_api(id: int, data: StudentTeacherBase):
+    student = update_student(id, data.model_dump())
+    return student
+
+@student_router.patch('/{id}', response_model=StudentTeacherResponse)
+def patch_student_api(id: int, data: StudentTeacherPatch):
+    student = update_student(id, data.model_dump(exclude_unset=True))
+    return student
+
+@student_router.delete('/{id}')
+def delete_student_api(id: int):
+    delete_student(id)
+    return Response(
+        {
+            "message": f"Student with id {id} deleted!",
+        },
+        status_code=status.HTTP_200_OK
+    )
+    
+@student_router.post('/{student_id}/group/{group_id}', response_model=StudentTeacherResponse)
+def post_new_group_student_api(student_id: int, group_id: int):
+    student = add_group_for_student(student_id, group_id)
+    return student
+
+@student_router.delete('/{student_id}/group/{group_id}', response_model=StudentTeacherResponse)
+def delete_group_student_api(student_id: int, group_id: int):
+    student = remove_group_for_student(student_id, group_id)
+    return student
