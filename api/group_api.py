@@ -3,12 +3,14 @@ from fastapi import APIRouter, HTTPException
 
 from database import (
     get_all_groups,
-    create_new_group
+    create_new_group,
+    get_single_group,
+    update_group
 )
 from schemas import (
     GroupBase,
     GroupResponse,
-    GroupPatch
+    GroupPatch,
 )
 
 group_router = APIRouter(
@@ -26,3 +28,19 @@ def create_new_group_api(data: GroupBase):
         return group
     else:
         raise HTTPException(400, "Cannot create group!")
+    
+@group_router.get('/{id}', response_model=GroupResponse)
+def get_single_group_api(id: int):
+    group = get_single_group(id)
+    return group
+
+@group_router.put('/{id}', response_model=GroupResponse)
+def put_group_api(id: int, data: GroupBase):
+    group = update_group(id, data.model_dump())
+    return group
+
+@group_router.patch('/{id}', response_model=GroupResponse)
+def patch_group_api(id: int, data: GroupPatch):
+    group = update_group(id, data.model_dump(exclude_unset=True))
+    return group
+

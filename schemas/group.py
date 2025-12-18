@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from pydantic import BaseModel, ConfigDict, Field
-from .student import StudentBase, StudentSimple
+from .student import StudentTeacherBase, StudentTeacherSimple
 
 class GroupBase(BaseModel):
     name: str = Field(max_length=50, min_length=3)
@@ -13,8 +13,9 @@ class GroupBase(BaseModel):
 class GroupResponse(BaseModel):
     id: int
     name: str = Field(max_length=50, min_length=3)
-    students: Optional[List[StudentSimple]] = None
-
+    students: Optional[List[StudentTeacherSimple]] = None
+    teachers: Optional[List[StudentTeacherSimple]] = None
+    
     model_config = ConfigDict(from_attributes=True)
     
 class GroupPatch(BaseModel):

@@ -7,22 +7,21 @@ class GroupSimple(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class StudentSimple(BaseModel):
+class StudentTeacherSimple(BaseModel):
     id: int
     name: str
     year: int
 
     model_config = ConfigDict(from_attributes=True)
 
-
-class StudentBase(BaseModel):
+class StudentTeacherBase(BaseModel):
     name: str = Field(max_length=100, min_length=3)
     year: int
     groups: Optional[List]
     
     model_config = ConfigDict(from_attributes=True)
     
-class StudentResponse(BaseModel):
+class StudentTeacherResponse(BaseModel):
     id: int
     name: str = Field(max_length=100, min_length=3)
     year: int
@@ -31,11 +30,12 @@ class StudentResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class StudentPatch(BaseModel):
+class StudentTeacherPatch(BaseModel):
     name: str | None = None
     year: int | None = None
     groups: Optional[List] | None = None
     
     class Config:
         orm_mode = True
-        
+
+           
