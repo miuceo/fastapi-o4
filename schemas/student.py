@@ -38,3 +38,4 @@ class StudentPatch(BaseModel):
     
     class Config:
         orm_mode = True
+        

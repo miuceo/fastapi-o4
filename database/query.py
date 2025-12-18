@@ -5,6 +5,8 @@ from .connect import (engine,
                     AssosiateGroupStudent,
                     AssosiateTeacherGroup)
 from sqlalchemy.orm import sessionmaker, Session
+from fastapi import status
+from fastapi.exceptions import HTTPException
 
 SessionLocal = sessionmaker(bind=engine,
                        autoflush=False,
@@ -36,9 +38,6 @@ def create_new_student(data: dict):
             Group.id.in_(group_ids)
         ).all()
 
-        if len(groups) != len(group_ids):
-            return None
-
         student.groups.extend(groups)
 
     db.add(student)
@@ -57,8 +56,10 @@ def get_one_student(id: int):
     db: Session = next(get_db())
     
     student = db.get(Student, id)
+    
     if not student:
-        return None
+        raise HTTPException(status_code=404, detail=f"Student with id {id} not found!")
+    
     return student
 
 def add_group_for_student(id: int, gr_id: int):
@@ -66,13 +67,31 @@ def add_group_for_student(id: int, gr_id: int):
     student = db.get(Student, id)
     
     if not student:
-        return None
+        raise HTTPException(status_code=404, detail=f"Student with id {id} not found!")
     
     group = db.get(Group, gr_id)
 
     if group in student.groups:
-        return None
+        raise HTTPException(status_code=400, detail=f'Group with id {id} not found!')
+        
     student.groups.append(group)
+    db.commit()
+    db.refresh(student)
+    return student
+
+def remove_group_for_student(id: int, gr_id: int):
+    db: Session = next(get_db())
+    student = db.get(Student, id)
+    
+    if not student:
+        raise HTTPException(status_code=404, detail=f"Student with id {id} not found!")
+    
+    group = db.get(Group, gr_id)
+
+    if group not in student.groups:
+        raise HTTPException(status_code=404, detail=f'Group with id {gr_id} not found!')
+        
+    student.groups.remove(group)
     db.commit()
     db.refresh(student)
     return student
@@ -81,8 +100,11 @@ def update_student(id: int, data: dict):
     db: Session = next(get_db())
     student = db.get(Student, id)
     
+    print(data)
+    
     if not student:
-        return None
+        raise HTTPException(status_code=404, detail=f"Student with id {id} not found!")
+    
     if "name" in data:
         student.name = data["name"]
     if "year" in data:
@@ -93,9 +115,6 @@ def update_student(id: int, data: dict):
         groups = db.query(Group).filter(
             Group.id.in_(group_ids)
         ).all()
-
-        if len(groups) != len(group_ids):
-           return None
 
         student.groups = groups
         
@@ -108,12 +127,11 @@ def delete_student(id: int):
     student = db.get(Student, id)
 
     if not student:
-        return None
+        raise HTTPException(status_code=404, detail=f"Student with id {id} not found!")
 
     db.delete(student)
     db.commit()
     return True
-
 
 # Course
 
